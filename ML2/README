@@ -1,0 +1,12 @@
+# Module: Machine Learning - Classification
+
+## Outline
+This course will cover:
+* Introduction to binary classification with scikit-learn
+* The main classification metrics (confusion matrix, precision, recall, ...)
+* The K-nearest neighbors algorithm
+* Grid search on classifiers
+
+## Excercises & Tasks
+
+There is one notebook to be completed, where the missing code is denoted by the comment *#TOFILL*, along with a memo that contains questions about the notebook exercises. Both come with their corrected versions with answers.

@@ -1,0 +1,25 @@
+1) What are the necessary preprocessing steps regarding:
+a) classes ?
+
+b) categorical features ? 
+
+c) continuous features ?
+
+2) Confusion matrix:
+a)How many patient were incorrectly diagnosed with a Heart disease (false positives) ?
+
+b)How many patient were incorrectly diagnosed as being Healthy (false negatives)?
+
+
+3) Changing the threshold:
+a)What is the precision if we change the threshold to have a 0.95 recall ? 
+
+b) How many patient were incorrectly diagnosed as being Healthy (false negatives)?
+
+
+
+4) Choosing an overall metric:
+
+a) If I can compute my test sample probabilities and care more about the positive class, which overall metric should I use to compare classifiers ? 
+
+b) And if I only have the class predictions and no probabilities ?
