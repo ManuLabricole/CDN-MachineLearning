@@ -1,15 +1,19 @@
 1) What are the necessary preprocessing steps regarding:
 a) classes ?
+--> Need to check if the target value are rougly equaly represented to advoid a bias
 
 b) categorical features ? 
+--> Need to create a column for each value of the categorical using pd.get_dummies()
 
 c) continuous features ?
+--> Standardization
 
 2) Confusion matrix:
 a)How many patient were incorrectly diagnosed with a Heart disease (false positives) ?
+--> 5
 
 b)How many patient were incorrectly diagnosed as being Healthy (false negatives)?
-
+--> 12
 
 3) Changing the threshold:
 a)What is the precision if we change the threshold to have a 0.95 recall ? 
