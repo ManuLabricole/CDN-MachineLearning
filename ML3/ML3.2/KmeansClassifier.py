@@ -13,35 +13,58 @@ class KmeansClassifier:
 
     def __str__(self) -> str:
         return f"KmeansClassifier(k={self.k}, max_iter={self.max_iter})"
-    
-    
 
-    def check_input(self, X, y):
-        if X is not None and y is not None:
-            self.X = X
-            self.y = y
-            print(f"X : {X}, y : {y}")
+    @property
+    def show_data(self):
+        return self.X
+
+    def check_data(self):
+        if not self.X:
+            raise Exception(
+                "X is not defined - please use .load_data(X) to load data before")
+
+    @property
+    def load_data(self, X):
+        if X is not None:
+            self.X = X.data
+            self.target = X.target
         else:
             raise Exception("X and y cannot be None")
 
+    @property
+    def init_centroids(self):
+
+        centroids = self.X[np.random.choice(
+            self.X.shape[0], self.k, replace=False)]
+
+        return centroids
+
+    # Cette fonction attend un dataframe de la forme IRIS pour avoir le .data et .target
+    @property
     def plot(self):
-        
-        fig, ax = plt.subplots(figsize=(12, 8))
-        # Create a dataframe with the principal components
-        df_pca = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
 
-        # Add a target column to the dataframe
-        df_pca['target'] = iris.target
+        if not self.X:
+            raise Exception("X is not defined")
+        else:
 
-        # Replace target values with class names
-        df_pca['target'] = df_pca['target'].replace({0: 'setosa', 1: 'versicolor', 2: 'virginica'})
+            pca = PCA(n_components=2)
+            X_pca = pca.fit_transform(self.X)
+            df_pca = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
+            df_pca['label'] = self.target
 
-        # Create a scatter plot of the first two principal components
-        plt.figure(figsize=(8, 6))
-        sns.scatterplot(x='PC1', y='PC2', hue='target', data=df_pca, palette='Set1')
-        plt.xlabel('Principal Component 1')
-        plt.ylabel('Principal Component 2')
-        plt.title('PCA on Iris Dataset')
-        plt.show()
-        
-    
+            # df_pca['label'] = df_pca['label'].replace({0: 'setosa', 1: 'versicolor', 2: 'virginica'})
+            fig, ax = plt.subplots(figsize=(12, 8))
+            sns.scatterplot(
+                ax=ax,
+                x='PC1',
+                y='PC2',
+                hue='label',
+                data=df_pca,
+                palette='Set2',
+                marker='x'
+            )
+
+            ax.set_xlabel('Principal Component 1')
+            ax.set_ylabel('Principal Component 2')
+            ax.set_title('PCA on Iris Dataset')
+            plt.show()
