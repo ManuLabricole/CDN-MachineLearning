@@ -16,10 +16,6 @@ class KmeansClassifier:
     def __str__(self) -> str:
         return f"KmeansClassifier(k={self.k}, max_iter={self.max_iter})"
 
-    def show_data(self):
-        # print(self.X)
-        return self.X
-
     def check_data(self):
         if not self.X:
             raise Exception(
@@ -33,14 +29,22 @@ class KmeansClassifier:
             raise Exception("X cannot be None")
 
     def init_centroids(self):
-
         centroids = self.X[np.random.choice(
             self.X.shape[0], self.k, replace=False)]
 
         self.centroids = centroids
-
         return centroids
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     # Cette fonction attend un dataframe de la forme IRIS pour avoir le .data et .target
 
     def plot(self):
