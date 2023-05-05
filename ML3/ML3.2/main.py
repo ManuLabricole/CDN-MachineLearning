@@ -16,3 +16,7 @@ clf = KmeansClassifier()
 
 clf.load_data(iris)
 clf.show_data()
+clf.init_centroids()
+# print(clf.X)
+clf.plot()
+
