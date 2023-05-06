@@ -16,6 +16,6 @@ clf = KmeansClassifier()
 
 clf.load_data(iris)
 clf.init_centroids()
-# print(clf.X)
+clf.compute_distance()
+cluster = clf.find_cluster_label()
 clf.plot()
-
