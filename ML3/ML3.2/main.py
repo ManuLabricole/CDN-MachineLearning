@@ -12,10 +12,16 @@ from sklearn.decomposition import PCA
 
 iris = load_iris()
 
-clf = KmeansClassifier()
+clf = KmeansClassifier(random_state=42)
 
-clf.load_data(iris)
-clf.init_centroids()
-clf.compute_distance()
-cluster = clf.find_cluster_label()
-clf.plot()
+clf.fit(iris)
+
+#clf.load_data(iris)
+#clf.init_centroids()
+#clf.compute_distance()
+#cluster = clf.find_cluster_label()
+#clf.compute_centroids()
+#
+#
+#
+#clf.plot()
