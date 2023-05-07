@@ -14,6 +14,7 @@ class KmeansClassifier:
         self.k = k
         self.max_iter = max_iter
         self.random_state = random_state
+        self.history = {}
 
     def __str__(self) -> str:
         return f"KmeansClassifier(k={self.k}, max_iter={self.max_iter})"
@@ -51,18 +52,14 @@ class KmeansClassifier:
         return centroids
     
     def compute_distance(self, X):
-        
         # On construit une matrice de distance entre chaque point et chaque centroid
         # Il faut l'initialiser à 0
         # Les dimensions sont (nombre de points, nombre de centroid)
         # Chaque ligne correspond à un point et chaque colonne à un centroid
-        distance = np.zeros((X.shape[0], self.k))
-        #print("------------------------ COMPUTATION OF DISTANCE ----------------------")
-        #print("-----------------------------------------------------------------------")
-        
         # Pour chaque point, on calcule la distance avec chaque centroid
         # On utilise la norme L2
         
+        distance = np.zeros((X.shape[0], self.k))
         for i, point in enumerate(X):
             distance[i] = norm(point - self.centroids, axis=1)
             
@@ -80,23 +77,14 @@ class KmeansClassifier:
     
     def compute_centroids(self):
         # On sauvegarde les anciens centroids pour pouvoir les comparer
-        self.old_centroids = self.centroids.copy()
-        
         # On calcule les nouveaux centroids en prenant la moyenne des points de chaque cluster
         # On initialise les nouveaux centroids à 0 par un array de la bonne taille : n_cluster / n_features
         # On effectue une boucle sur les clusters et on calcule la moyenne des points de chaque cluster
         
-        
+        self.old_centroids = self.centroids.copy()
         self.centroids = np.zeros((self.k, self.X.shape[1]))
         for k in range(self.k):
-            
-            # print(f"Cluster {k} --> {self.X[self.cluster == k]}")
             self.centroids[k] = np.mean(self.X[self.cluster == k], axis=0)
-            
-            
-        #print("------------------------ COMPUTE CENTROIDS ----------------------")
-        #print("CENTROIDS : ", self.centroids)
-        #print("OLD CENTROIDS : ", self.old_centroids)
         
         return self.old_centroids, self.centroids
     
@@ -106,20 +94,11 @@ class KmeansClassifier:
         centroids = self.init_centroids()
         
         for i in range(self.max_iter):
-            print("ITERATION : ", i)
             self.compute_distance(data)
             self.find_cluster_label()
             self.compute_centroids()
             
-            D_tresh = abs(np.mean(self.centroids-self.old_centroids))
-            print("Centroids",self.centroids)
-            print("Old Centroids",self.old_centroids)
-            print("distance", D_tresh)
-            
-            
-            if D_tresh < treshold:
-
-                print("TRESHOLD REACHED", D_tresh)
+            if abs(np.mean(self.centroids-self.old_centroids)) < treshold:
                 break
 
     
