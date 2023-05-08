@@ -9,20 +9,12 @@ import seaborn as sns
 
 from KmeansClassifier import KmeansClassifier
 from sklearn.decomposition import PCA
+import matplotlib.animation as animation
 
 iris = load_iris()
 wine = load_wine()
 
-clf = KmeansClassifier(random_state=42, k=5, max_iter=100)
+clf = KmeansClassifier(random_state=42, k=3, max_iter=100)
+clf.fit(iris)
 
-clf.fit(wine)
-
-#clf.load_data(iris)
-#clf.init_centroids()
-#clf.compute_distance()
-#cluster = clf.find_cluster_label()
-#clf.compute_centroids()
-#
-#
-#
-clf.plot()
+clf.display_animation()
