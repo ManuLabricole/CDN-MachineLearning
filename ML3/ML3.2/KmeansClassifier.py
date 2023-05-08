@@ -7,8 +7,6 @@ import seaborn as sns
 from sklearn.decomposition import PCA
 from numpy.linalg import norm
 
-
-
 class KmeansClassifier:
     def __init__(self, k=3, max_iter=100, X=None, random_state=42):
         self.k = k
@@ -27,13 +25,13 @@ class KmeansClassifier:
             return True
 
     def load_data(self, X):
-        if X is not None:
+        try:
             self.X = X.data
             self.target = X.target
             
             return self.X
-        else:
-            raise Exception("X cannot be None")
+        except:
+            raise Exception("X is not a standart sklearn dataset and X.data is not defined")
 
     def init_centroids(self):
         # On initialise les centroids en prenant k points au hasard
@@ -94,9 +92,16 @@ class KmeansClassifier:
         centroids = self.init_centroids()
         
         for i in range(self.max_iter):
+            print("Iteration --> ", i, " <-- / ", self.max_iter, " ...")
             self.compute_distance(data)
             self.find_cluster_label()
             self.compute_centroids()
+            
+            self.history[i] = {
+                "centroids": self.centroids,
+                "cluster": self.cluster,
+                "distance": self.distance,
+            }
             
             if abs(np.mean(self.centroids-self.old_centroids)) < treshold:
                 break
@@ -131,12 +136,12 @@ class KmeansClassifier:
             # df_pca['label'] = self.target
 
             df_X['label'] = pd.Series(self.cluster, index=df_X.index)
-            print("------------------------ DF_X ----------------------")
-            print(df_X)
-            print("------------------------ DF_centroids ----------------------")
-            print(df_centroids)
-            print("------------------------ DF_centroids_old ----------------------")
-            print(df_centroids_old)
+            #print("------------------------ DF_X ----------------------")
+            #print(df_X)
+            #print("------------------------ DF_centroids ----------------------")
+            #print(df_centroids)
+            #print("------------------------ DF_centroids_old ----------------------")
+            #print(df_centroids_old)
             
             fig, ax = plt.subplots(figsize=(12, 8))
             sns.scatterplot(
