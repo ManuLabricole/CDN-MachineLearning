@@ -11,8 +11,9 @@ import matplotlib.animation as animation
 
 class KmeansClassifier:
     """
-    
+
     """
+
     def __init__(self, k=3, max_iter=100, X=None, random_state=42):
         self.k = k
         self.max_iter = max_iter
@@ -59,6 +60,14 @@ class KmeansClassifier:
         return centroids
 
     def compute_distance(self, X):
+        """
+        On construit une matrice de distance entre chaque point et chaque centroid
+        Il faut l'initialiser à 0
+        Les dimensions sont (nombre de points, nombre de centroid)
+        Chaque ligne correspond à un point et chaque colonne à un centroid
+        Pour chaque point, on calcule la distance avec chaque centroid
+        On utilise la norme L2
+        """
         # On construit une matrice de distance entre chaque point et chaque centroid
         # Il faut l'initialiser à 0
         # Les dimensions sont (nombre de points, nombre de centroid)
@@ -71,7 +80,7 @@ class KmeansClassifier:
             distance[i] = norm(point - self.centroids, axis=1)
 
         self.distance = distance
-        
+
         return self.distance
 
     def find_cluster_label(self):
@@ -84,10 +93,12 @@ class KmeansClassifier:
         return self.cluster
 
     def compute_centroids(self):
-        # On sauvegarde les anciens centroids pour pouvoir les comparer
-        # On calcule les nouveaux centroids en prenant la moyenne des points de chaque cluster
-        # On initialise les nouveaux centroids à 0 par un array de la bonne taille : n_cluster / n_features
-        # On effectue une boucle sur les clusters et on calcule la moyenne des points de chaque cluster
+        """
+        On sauvegarde les anciens centroids pour pouvoir les comparer
+        On calcule les nouveaux centroids en prenant la moyenne des points de chaque cluster
+        On initialise les nouveaux centroids à 0 par un array de la bonne taille : n_cluster / n_features
+        On effectue une boucle sur les clusters et on calcule la moyenne des points de chaque cluster       
+        """
 
         self.old_centroids = self.centroids.copy()
         self.centroids = np.zeros((self.k, self.X.shape[1]))
@@ -119,14 +130,12 @@ class KmeansClassifier:
     # Cette fonction attend un dataframe de la forme IRIS pour avoir le .data et .target
 
     def plot_results(self, title):
+        """
+        To show only 2 dimensions, we use PCA
+        First we fit the PCA on the data, then we transform the data and the centroids
+        Finally we plot the data and the centroids
+        """
 
-        print("------------------------------------------------------------------------------------------------------")
-        print("---------------------------------------------- RESULTS -----------------------------------------------")
-        print("------------------------------------------------------------------------------------------------------")
-
-        # To show only 2 dimensions, we use PCA
-        # First we fit the PCA on the data, then we transform the data and the centroids
-        # Finally we plot the data and the centroids
         pca = PCA(n_components=2)
         X_pca = pca.fit_transform(self.X)
         centroids_pca = pca.transform(self.centroids)
