@@ -10,6 +10,9 @@ import matplotlib.animation as animation
 
 
 class KmeansClassifier:
+    """
+    
+    """
     def __init__(self, k=3, max_iter=100, X=None, random_state=42):
         self.k = k
         self.max_iter = max_iter
@@ -37,9 +40,11 @@ class KmeansClassifier:
                 "X is not a standart sklearn dataset and X.data is not defined")
 
     def init_centroids(self):
-        # On initialise les centroids en prenant k points au hasard
-        # On utilise un random state pour pouvoir reproduire les résultats
-        # On ajoute un attribut centroids à la classe en utilisant self
+        """
+        On initialise les centroids en prenant k points au hasard
+        On utilise un random state pour pouvoir reproduire les résultats
+        On ajoute un attribut centroids à la classe en utilisant self
+        """
 
         if self.X is None:
             raise Exception(
@@ -66,6 +71,7 @@ class KmeansClassifier:
             distance[i] = norm(point - self.centroids, axis=1)
 
         self.distance = distance
+        
         return self.distance
 
     def find_cluster_label(self):
