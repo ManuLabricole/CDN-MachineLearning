@@ -1,0 +1,15 @@
+# Module: Machine Learning - Recommender Systems
+
+## Outline
+This course will cover:
+* Introduction to Keras library with CPU/GPU
+* Implement and train a matrix factorization model from real user/movies ratings data
+* Make movie recommendations to users with this model
+* Visualize the produced movie embeddings
+* Re-use the embeddings for classification problems
+
+
+## Excercises & Tasks
+
+There is one notebook to be completed, where the missing code is denoted by the comment *#TOFILL*.
+
