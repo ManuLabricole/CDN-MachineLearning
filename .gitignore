@@ -1,9 +1,9 @@
 ML1/data/
-# We want to add the data to the data folder in the ML1 folder
-# so we need to go up one level
 ML2/part_1/data/
 ML2/part_2/data/
 ML2/part_3/data/
 ML3/data/
 ML4/data/
+ML5/data/
+ML5/corrections
 Hands-on-Machine-Learning.pdf
