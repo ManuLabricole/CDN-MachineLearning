@@ -1,5 +1,6 @@
 import statsmodels.stats.api as sms
 from statsmodels.formula.api import ols
+import pandas as pd
 
 TEST_NAMES = ['White', 'Breusch-Pagan', 'Goldfeld-Quandt']
 FORMULA = 'value ~ time'
