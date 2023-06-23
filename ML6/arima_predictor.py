@@ -9,6 +9,9 @@ from pmdarima.arima import ARIMA
 
 from statsmodels.graphics.tsaplots import plot_pacf
 
+import statsmodels.api as sm
+from sklearn.metrics import mean_squared_error
+
 
 class ArimaPredictor:
     def __init__(self):
@@ -135,6 +138,9 @@ class ArimaPredictor:
         train = data.loc[data.index < split_date]
         test = data.loc[data.index >= split_date]
         
+        self.train = train
+        self.test = test
+        
         return train, test
     
     def fit(self, data, plot:bool=True, seasonal:bool=True, transform_log:bool=True, p:int=1, d:int=1, q:int=1, P:int=1, D:int=1, Q:int=1, s:int=12):
@@ -174,9 +180,7 @@ class ArimaPredictor:
     def predict(self, train, test, plot:bool=True):
         print("[ArimaPredictor] Predicting...")
         print("[ArimaPredictor] n_periods: ", len(test))
-        
     
-        
         y_pred, conf_int = self.model.predict(n_periods=len(test), return_conf_int=True)
 
         if plot:
@@ -192,9 +196,67 @@ class ArimaPredictor:
         
             plt.legend()
         
+        self.y_pred = y_pred
         print("[ArimaPredictor] Prediction done")  
         
+    def get_metrics(self):
+        if self.y_pred is None:
+            print("[ArimaPredictor] No prediction done yet")
+            return None
+        else:
+            mape = mean_absolute_percentage_error(self.test, np.exp(self.y_pred))
+            rmse, rmse_mean = find_model_rmse(self.test, np.exp(self.y_pred))
+            
+            return mape, rmse, rmse_mean
         
+    def grid_search(self, range_to_study = 1):
+        R = range_to_study + 1
+        test_number = 0
+
+        param_tested = []
+        MAPE_LIST = []
+        RMSE_LIST = []
+        RMSE_MEAN_LIST = []
+
+        for p in range(R):
+            for q in range(R):
+                for d in range(R):
+                    for P in range(R):
+                        for Q in range(R):
+                            for D in range(R):
+
+                                print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
+                                print(f"Testing --> {test_number} / {R*R*R*R*R*R}")
+                                print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
+
+                                param = {
+                                    "p" : p,
+                                    "q" : q,
+                                    "d" : d,
+                                    "P" : P,
+                                    "Q" : Q,
+                                    "D" : D,
+                                }
+
+                                self.fit(self.train, plot=False, **param)
+                                self.predict(self.train, self.test, plot=False)
+                                MAPE, RMSE, RMSE_MEAN = self.get_metrics()
+
+                                param_tested.append(param)
+                                MAPE_LIST.append(MAPE)
+                                RMSE_LIST.append(RMSE)
+                                RMSE_MEAN_LIST.append(RMSE_MEAN)
+
+                                test_number += 1
+                                
+        self.grid_search_results = pd.DataFrame({
+            "param_tested" : param_tested,
+            "MAPE" : MAPE_LIST,
+            "RMSE" : RMSE_LIST,
+            "RMSE_MEAN" : RMSE_MEAN_LIST
+        })
+        
+            
 
 # ------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------
@@ -324,3 +386,19 @@ def study_stationarity(dff:pd.DataFrame, rolling_1:int=6, rolling_2:int=12, colo
     # Displaying the plot
     plt.show()
     
+# COMPUTING THE  METRICS
+
+def mean_absolute_percentage_error(y_true, y_pred):
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+    print("MAPE", mape)
+    return mape
+
+def find_model_rmse(test_data, y_pred_transformed):
+    #Calculate RMSE and RMSE/mean(test)
+    RMSE = np.sqrt(mean_squared_error(test_data, y_pred_transformed))
+    RMSE_MEAN = RMSE/np.mean(test_data)
+    print(f"RMSE --> {RMSE}")
+    print(f"RMSE/MEAN --> {RMSE/np.mean(test_data)}")
+    return RMSE, RMSE_MEAN
