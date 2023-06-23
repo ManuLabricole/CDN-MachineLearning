@@ -3,7 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.tsa.stattools as stattools
+
 from statsmodels.tsa.stattools import adfuller, kpss, acf, pacf
+from pmdarima.arima import ARIMA
 
 from statsmodels.graphics.tsaplots import plot_pacf
 
@@ -15,6 +17,9 @@ class ArimaPredictor:
      
     def is_initialized(self):
         return True
+    
+    def data(self):
+        return self.data
     
     def print_created(self):
         print("[ArimaPredictor] Created")
@@ -28,9 +33,6 @@ class ArimaPredictor:
             self.data = None
             
     def check_data_stationarity(self, method:str="all" ,significance_level:float=0.05, data:pd.DataFrame=None):
-        
-        if data is not None:
-            self.load_data(data)
         
         print("[ArimaPredictor] Checking data stationarity...")
         if self.data is None:
@@ -50,16 +52,13 @@ class ArimaPredictor:
         
     def plot_data_curves(self, data:pd.DataFrame=None, color_palette:str="tab20_r", rolling_1:int=6, rolling_2:int=12):
         
-        if data is not None:
-            self.load_data(data)
-        
         print("[ArimaPredictor] Plotting data curves...")
         print("[ArimaPredictor] Rolling 1: ", rolling_1)
         print("[ArimaPredictor] Rolling 2: ", rolling_2)
         
         study_stationarity(self.data, rolling_1, rolling_2, color_palette)
 
-    def plot_ACF_PACF(self, data:pd.DataFrame=None, lags:int=50, color_palette:str="tab20_r"):
+    def plot_ACF_PACF(self, data:pd.DataFrame=None, lags:int=24, color_palette:str="tab20_r"):
         """
         if data is not None:
             self.load_data(data)
@@ -81,8 +80,8 @@ class ArimaPredictor:
             data = self.data
         
         n_sample = len(data)
-        lag_acf = acf(np.log(data).diff().dropna(), nlags=25)
-        lag_pacf = pacf(np.log(data).diff().dropna(), nlags=25)
+        lag_acf = acf(np.log(data).diff().dropna(), nlags=lags)
+        lag_pacf = pacf(np.log(data).diff().dropna(), nlags=lags)
 
         pct_95 = 1.96/np.sqrt(n_sample)
 
@@ -108,7 +107,94 @@ class ArimaPredictor:
         # plt.legend()
         plt.show()
         
+    def ts_train_test_split(self, data=None, split_date="1959-01-01"):
+        '''
+        Split time series into training and test data
+
+        Parameters:
+        -------
+        data - pd.DataFrame - time series data.  Index expected as datatimeindex
+        split_date - the date on which to split the time series
+
+        Returns:
+        --------
+        tuple (len=2) 
+        0. pandas.DataFrame - training dataset
+        1. pandas.DataFrame - test dataset
+        '''
+        
+        if data is None:
+            print("[ArimaPredictor] Data not sent")
+            print("[ArimaPredictor] Loading data...")
+            data = self.data
+            cols = data.columns
+            data = data[cols[0]]
+        else:
+            pass
+        
+        train = data.loc[data.index < split_date]
+        test = data.loc[data.index >= split_date]
+        
+        return train, test
     
+    def fit(self, data, plot:bool=True, seasonal:bool=True, transform_log:bool=True, p:int=1, d:int=1, q:int=1, P:int=1, D:int=1, Q:int=1, s:int=12):
+        print("[ArimaPredictor] Fitting model...")
+        print("[ArimaPredictor] p: ", p)
+        print("[ArimaPredictor] d: ", d)
+        print("[ArimaPredictor] q: ", q)
+        print("[ArimaPredictor] P: ", P)
+        print("[ArimaPredictor] D: ", D)
+        print("[ArimaPredictor] Q: ", Q)
+        print("[ArimaPredictor] s: ", s)
+        
+        if transform_log:
+            print("[ArimaPredictor] Transforming data to log...")
+            data = np.log(data)
+            
+        if seasonal:
+            self.model = ARIMA(
+            order=(p, d, q),
+            seasonal_order=(P, D, Q, s), # 12 for monthly data
+            suppress_warnings = True
+        )
+        else:
+            self.model = ARIMA(
+                order = (p, d, q),
+                suppress_warnings = True
+            )
+            
+        self.model.fit(data)
+        
+        if plot:
+            self.model.plot_diagnostics(figsize=(12,9));
+            plt.show()
+        
+        print("[ArimaPredictor] Model fitted")
+        
+    def predict(self, train, test, plot:bool=True):
+        print("[ArimaPredictor] Predicting...")
+        print("[ArimaPredictor] n_periods: ", len(test))
+        
+    
+        
+        y_pred, conf_int = self.model.predict(n_periods=len(test), return_conf_int=True)
+
+        if plot:
+            plt.plot(train, label='Train')
+            plt.plot(test, label='Test')
+            
+            plt.fill_between(y_pred.index,
+                         *np.exp(conf_int).T,
+                         alpha=0.2, color='orange',
+                         label="ARIMA Confidence Intervals")
+        
+            plt.plot(np.exp(y_pred), label='ARIMA Prediction')
+        
+            plt.legend()
+        
+        print("[ArimaPredictor] Prediction done")  
+        
+        
 
 # ------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------
@@ -238,23 +324,3 @@ def study_stationarity(dff:pd.DataFrame, rolling_1:int=6, rolling_2:int=12, colo
     # Displaying the plot
     plt.show()
     
-# Fit and evaluate ARIMA model:
-
-def ts_train_test_split(data, split_date):
-    '''
-    Split time series into training and test data
-    
-    Parameters:
-    -------
-    data - pd.DataFrame - time series data.  Index expected as datatimeindex
-    split_date - the date on which to split the time series
-    
-    Returns:
-    --------
-    tuple (len=2) 
-    0. pandas.DataFrame - training dataset
-    1. pandas.DataFrame - test dataset
-    '''
-    train = data.loc[data.index < split_date]
-    test = data.loc[data.index >= split_date]
-    return train, test
