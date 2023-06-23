@@ -60,7 +60,7 @@ class ArimaPredictor:
         study_stationarity(self.data, rolling_1, rolling_2, color_palette)
 
     def plot_ACF_PACF(self, data:pd.DataFrame=None, lags:int=50, color_palette:str="tab20_r"):
-        
+        """
         if data is not None:
             self.load_data(data)
         elif data is None and self.data is None:
@@ -75,8 +75,43 @@ class ArimaPredictor:
         
         plot_acf(self.data, lags=lags)
         plot_pacf_perso(self.data, lags=lags)
+        """
         
+        if data is None:
+            data = self.data
+        
+        n_sample = len(data)
+        lag_acf = acf(np.log(data).diff().dropna(), nlags=25)
+        lag_pacf = pacf(np.log(data).diff().dropna(), nlags=25)
 
+        pct_95 = 1.96/np.sqrt(n_sample)
+
+        plt.figure(figsize=(15, 3))
+        #Plot ACF:
+        plt.subplot(121)
+        plt.stem(lag_acf)
+        plt.axhline(y=0, linestyle='--', color='gray')
+        plt.axhline(y=-pct_95, linestyle='--', color='gray')
+        plt.axhline(y=pct_95, linestyle='--', color='gray')
+        # plt.axvline(x=q, color='black', linestyle='--', label=f'q={q}')
+        # plt.legend()
+        plt.title('Autocorrelation Function')            
+
+        #Plot PACF
+        plt.subplot(122)
+        plt.stem(lag_pacf)
+        plt.axhline(y=0, linestyle='--', color='gray')
+        plt.axhline(y=-pct_95, linestyle='--', color='gray') # represent 95 % of a gaussian data
+        plt.axhline(y=pct_95, linestyle='--', color='gray') # represente 95 % of a gaussian data
+        # plt.axvline(x=p, color='black', linestyle='--', label=f'p={p}')
+        plt.title('Partial Autocorrelation Function')
+        # plt.legend()
+        plt.show()
+        
+    
+
+# ------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------
 # End Class ArimaPredictor
 
 # Utils functions
@@ -203,48 +238,23 @@ def study_stationarity(dff:pd.DataFrame, rolling_1:int=6, rolling_2:int=12, colo
     # Displaying the plot
     plt.show()
     
-# ACF and PACF plots:
+# Fit and evaluate ARIMA model:
 
-def plot_pacf_perso(data:pd.DataFrame, lags:int=24):
+def ts_train_test_split(data, split_date):
+    '''
+    Split time series into training and test data
     
-    print("[INFO] Plotting PACF...")
-    print(type(data))
+    Parameters:
+    -------
+    data - pd.DataFrame - time series data.  Index expected as datatimeindex
+    split_date - the date on which to split the time series
     
-    try:
-        df = data.copy()
-        cols = df.columns
-    except:
-        raise Exception("[ERROR]")
-
-    
-    plot_pacf(df[cols[0]])
-    plt.xlabel('Lag')
-    plt.ylabel('PACF')
-    plt.title('Partial Autocorrelation Function (PACF) - log / diff ')
-    plt.show()
-    
-
-def plot_acf(data:pd.DataFrame, lags:int=24):
-    print("[INFO] Plotting ACF...")
-    
-    df = data.copy()
-    
-    if type(df) == pd.core.frame.DataFrame or type(df) == pd.core.series.Series:
-        cols = df.columns
-        df = df[cols[0]]
-        print("[WARNING] Dataframe detected, using first column")
-    else:
-        print("[INFO] Dataframe not detected, using data as is")
-        print("[INFO] Data type:", type(df))
-        print("[INFO] Trying to plot...")
-    
-    # Calculate the ACF
-    acf = stattools.acf(df, nlags=24)
-    # Plot the ACF
-    plt.plot(acf)
-    plt.xlabel('Lag')
-    plt.ylabel('ACF')
-    plt.axhline(y=0, linestyle='--', color='gray')
-    plt.axhline(y=-1.96/np.sqrt(len(data)), linestyle='--', color='gray')
-    plt.axhline(y=1.96/np.sqrt(len(data)), linestyle='--', color='gray')
-    plt.show()
+    Returns:
+    --------
+    tuple (len=2) 
+    0. pandas.DataFrame - training dataset
+    1. pandas.DataFrame - test dataset
+    '''
+    train = data.loc[data.index < split_date]
+    test = data.loc[data.index >= split_date]
+    return train, test
